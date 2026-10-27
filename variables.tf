@@ -61,6 +61,11 @@ Optional:
             - subject_type (required)
         - requests_accepted (optional)
         - scope_type (optional)
+    - timeouts (block):
+        - create (optional)
+        - delete (optional)
+        - read (optional)
+        - update (optional)
 EOT
 
   type = map(object({
@@ -136,6 +141,12 @@ EOT
       requests_accepted = optional(bool)
       scope_type        = optional(string)
     }))
+    timeouts = optional(object({
+      create = optional(string)
+      delete = optional(string)
+      read   = optional(string)
+      update = optional(string)
+    }))
   }))
   validation {
     condition = alltrue([
@@ -175,7 +186,7 @@ EOT
         v.requestor_settings == null || (v.requestor_settings.requestor == null || alltrue([for item in v.requestor_settings.requestor : (contains([for v in ["ConnectedOrganizationMembers", "ExternalSponsors", "GroupMembers", "InternalSponsors", "RequestorManager", "SingleUser", "TargetUserSponsors"] : lower(v)], lower(item.subject_type)))]))
       )
     ])
-    error_message = "must be one of: ConnectedOrganizationMembers, ExternalSponsors, GroupMembers, InternalSponsors, RequestorManager, SingleUser, TargetUserSponsors"
+    error_message = "must be one of: \"ConnectedOrganizationMembers\", \"ExternalSponsors\", \"GroupMembers\", \"InternalSponsors\", \"RequestorManager\", \"SingleUser\", \"TargetUserSponsors\""
   }
   validation {
     condition = alltrue([
@@ -183,7 +194,7 @@ EOT
         v.approval_settings == null || (v.approval_settings.approval_stage == null || alltrue([for item in v.approval_settings.approval_stage : (item.primary_approver == null || alltrue([for item in item.primary_approver : (contains([for v in ["ConnectedOrganizationMembers", "ExternalSponsors", "GroupMembers", "InternalSponsors", "RequestorManager", "SingleUser", "TargetUserSponsors"] : lower(v)], lower(item.subject_type)))]))]))
       )
     ])
-    error_message = "must be one of: ConnectedOrganizationMembers, ExternalSponsors, GroupMembers, InternalSponsors, RequestorManager, SingleUser, TargetUserSponsors"
+    error_message = "must be one of: \"ConnectedOrganizationMembers\", \"ExternalSponsors\", \"GroupMembers\", \"InternalSponsors\", \"RequestorManager\", \"SingleUser\", \"TargetUserSponsors\""
   }
   validation {
     condition = alltrue([
@@ -191,7 +202,7 @@ EOT
         v.approval_settings == null || (v.approval_settings.approval_stage == null || alltrue([for item in v.approval_settings.approval_stage : (item.alternative_approver == null || alltrue([for item in item.alternative_approver : (contains([for v in ["ConnectedOrganizationMembers", "ExternalSponsors", "GroupMembers", "InternalSponsors", "RequestorManager", "SingleUser", "TargetUserSponsors"] : lower(v)], lower(item.subject_type)))]))]))
       )
     ])
-    error_message = "must be one of: ConnectedOrganizationMembers, ExternalSponsors, GroupMembers, InternalSponsors, RequestorManager, SingleUser, TargetUserSponsors"
+    error_message = "must be one of: \"ConnectedOrganizationMembers\", \"ExternalSponsors\", \"GroupMembers\", \"InternalSponsors\", \"RequestorManager\", \"SingleUser\", \"TargetUserSponsors\""
   }
   validation {
     condition = alltrue([
@@ -199,8 +210,16 @@ EOT
         v.assignment_review_settings == null || (v.assignment_review_settings.reviewer == null || alltrue([for item in v.assignment_review_settings.reviewer : (contains([for v in ["ConnectedOrganizationMembers", "ExternalSponsors", "GroupMembers", "InternalSponsors", "RequestorManager", "SingleUser", "TargetUserSponsors"] : lower(v)], lower(item.subject_type)))]))
       )
     ])
-    error_message = "must be one of: ConnectedOrganizationMembers, ExternalSponsors, GroupMembers, InternalSponsors, RequestorManager, SingleUser, TargetUserSponsors"
+    error_message = "must be one of: \"ConnectedOrganizationMembers\", \"ExternalSponsors\", \"GroupMembers\", \"InternalSponsors\", \"RequestorManager\", \"SingleUser\", \"TargetUserSponsors\""
   }
-  # Note: 8 additional provider-side validators are enforced at apply time but not mirrored as validation{} blocks here (bespoke or non-mechanically-translatable).
+  validation {
+    condition = alltrue([
+      for k, v in var.access_package_assignment_policies : (
+        v.assignment_review_settings == null || (v.assignment_review_settings.access_review_timeout_behavior == null || (contains(["acceptAccessRecommendation", "keepAccess", "removeAccess"], v.assignment_review_settings.access_review_timeout_behavior)))
+      )
+    ])
+    error_message = "must be one of: \"acceptAccessRecommendation\", \"keepAccess\", \"removeAccess\""
+  }
+  # Note: 7 additional provider-side validators are enforced at apply time but not mirrored as validation{} blocks here (bespoke or non-mechanically-translatable).
 }
 

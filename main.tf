@@ -113,5 +113,15 @@ resource "azuread_access_package_assignment_policy" "access_package_assignment_p
       scope_type        = requestor_settings.value.scope_type
     }
   }
+
+  dynamic "timeouts" {
+    for_each = each.value.timeouts != null ? [each.value.timeouts] : []
+    content {
+      create = timeouts.value.create
+      delete = timeouts.value.delete
+      read   = timeouts.value.read
+      update = timeouts.value.update
+    }
+  }
 }
 
